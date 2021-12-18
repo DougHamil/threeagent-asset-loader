@@ -12,7 +12,7 @@
                                       :username :env
                                       :password :env}]]
 
-  :dependencies [camel-snake-kebab "0.4.2"]
+  :dependencies [[camel-snake-kebab "0.4.2"]]
 
   :source-paths ["src"]
 

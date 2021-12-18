@@ -1,0 +1,108 @@
+version: 2.1
+
+executors:
+  ci-executor:
+    docker:
+      - image: douggernaut/threeagent-ci:0.0.1
+    working_directory: ~/app
+
+orbs:
+  changelog: onimur/github-changelog-generator@2.1.9
+
+jobs:
+  test:
+    executor: ci-executor
+    working_directory: ~/app/test/browser_test
+    steps:
+      - checkout:
+          path: ~/app
+      - restore_cache:
+          keys:
+            - npm-browser-test-{{ checksum "package-lock.json" }}
+      - run: npm ci
+      - save_cache:
+          key: npm-browser-test-{{ checksum "package-lock.json" }}
+          paths:
+            - "node_modules"
+      - run:
+          name: Building cljs
+          command: npx shadow-cljs compile ci
+      - run:
+          name: Running karma tests
+          command: npx karma start --single-run
+      - store_test_results:
+          path: reports
+
+  deploy_snapshot:
+    executor: ci-executor
+    steps:
+      - checkout
+      - run:
+          command: echo -e "$GPG_KEY" | gpg --import
+      - run:
+          name: Deploying to clojars
+          command: lein deploy
+
+  release:
+    executor: ci-executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "04:0f:c2:c2:05:9e:ba:ea:eb:73:ac:54:ad:3f:2e:40"
+      - checkout
+      - run:
+          command: echo -e "$GPG_KEY" | gpg --import
+      - run:
+          name: Git Config
+          command: |
+            git config --global user.email "doug.hamil@gmail.com"
+            git config --global user.name "CircleCI Release Script"
+            git config --global user.signingkey C89350FC
+            git remote set-url origin https://github.com/DougHamil/threeagent-asset-loader.git
+      - run:
+          name: Release rc
+          command: lein release :patch
+
+workflows:
+  changelog:
+    jobs:
+      - changelog/changelog-default:
+          pre-steps:
+            - checkout
+            - add_ssh_keys:
+                fingerprints:
+                  - "04:0f:c2:c2:05:9e:ba:ea:eb:73:ac:54:ad:3f:2e:40"
+          branch: main
+          commit-message: "Update CHANGELOG"
+          git-push: true
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+
+  build-test-deploy:
+    jobs:
+      - test:
+      - deploy_snapshot:
+          filters:
+            branches:
+              only:
+                - "main"
+          requires:
+            - test
+
+      - hold:
+          filters:
+            branches:
+              only: /^release$/
+          type: approval
+          requires:
+            - test
+
+      - release:
+          filters:
+            branches:
+              only: /^release$/
+          requires:
+            - hold
