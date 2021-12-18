@@ -81,7 +81,7 @@ workflows:
             tags:
               only: /^v\d+\.\d+\.\d+$/
 
-  build-test-deploy:
+  build-test-publish:
     jobs:
       - test:
       - deploy_snapshot:

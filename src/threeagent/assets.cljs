@@ -8,6 +8,7 @@
 (defn load! [asset-database asset-tree]
   (impl/load! asset-database asset-tree))
 
+(def ref impl/ref)
 (def model-loader model/loader)
 (def texture-loader texture/loader)
 (def audio-howler-loader audio-howler/loader)
