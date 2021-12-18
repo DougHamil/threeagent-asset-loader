@@ -1,0 +1,15 @@
+{:source-paths ["src" "../../src"]
+ :dependencies []
+ :builds {:test     {:target    :browser-test
+                     :test-dir  "resources/public/js/test"
+                     :ns-regexp "-test$"
+                     :devtools  {:http-port          8021
+                                 :http-root          "resources/public/js/test"}}
+          :ci {:target :karma
+               :output-to "target/ci.js"
+               :ns-regex "-test$"}
+
+          :dev {:target :browser
+                :modules {:main {:init-fn app/main}}
+                :output-dir "public/js"
+                :devtools {:http-root "public" :http-port 8080}}}}
