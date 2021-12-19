@@ -11,5 +11,5 @@
 (defn loader [_key path cfg]
   (js/Promise. (fn [res _rej]
                   (.load @three-texture-loader path
-                         #(on-load res %)))))
+                         #(on-load res cfg %)))))
 
