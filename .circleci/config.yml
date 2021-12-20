@@ -20,6 +20,7 @@ jobs:
       - restore_cache:
           keys:
             - npm-browser-test-{{ checksum "package-lock.json" }}
+            - mvn-browser-test-{{ checksum "shadow-cljs.edn" }}
       - run: npm ci
       - save_cache:
           key: npm-browser-test-{{ checksum "package-lock.json" }}
@@ -28,6 +29,10 @@ jobs:
       - run:
           name: Building cljs
           command: npx shadow-cljs compile ci
+      - save_cache:
+          key: mvn-browser-test-{{ checksum "shadow-cljs.edn" }}
+          paths:
+            - "~/.m2"
       - run:
           name: Running karma tests
           command: npx karma start --single-run
