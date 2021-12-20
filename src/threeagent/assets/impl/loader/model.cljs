@@ -7,11 +7,11 @@
 (def ^:private gltf-loader (delay (GLTFLoader.)))
 (def ^:private fbx-loader (delay (FBXLoader.)))
 
-(def ^:private loaders-by-ext {#"\.glb^" gltf-loader
-                               #"\.gltf^" gltf-loader
-                               #"\.fbx^" fbx-loader})
+(def ^:private loaders-by-ext {#"(?i).+\.glb$" gltf-loader
+                               #"(?i).+\.gltf$" gltf-loader
+                               #"(?i).+\.fbx$" fbx-loader})
 
-(defn- select-loader [path]
+(defn select-loader [path]
   (->> loaders-by-ext
        (filter (fn [[regex _loader]]
                  (re-matches regex path)))

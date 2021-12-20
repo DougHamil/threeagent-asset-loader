@@ -13,26 +13,24 @@ orbs:
 jobs:
   test:
     executor: ci-executor
-    working_directory: ~/app/test/browser_test
     steps:
-      - checkout:
-          path: ~/app
+      - checkout
       - restore_cache:
           keys:
-            - npm-browser-test-{{ checksum "package-lock.json" }}
+            - npm-{{ checksum "package-lock.json" }}
       - restore_cache:
           keys:
-            - mvn-browser-test-{{ checksum "shadow-cljs.edn" }}
+            - mvn-{{ checksum "shadow-cljs.edn" }}
       - run: npm ci
       - save_cache:
-          key: npm-browser-test-{{ checksum "package-lock.json" }}
+          key: npm-{{ checksum "package-lock.json" }}
           paths:
             - "node_modules"
       - run:
-          name: Building cljs
-          command: npx shadow-cljs compile ci
+          name: Building CLJS for karma tests
+          command: npx shadow-cljs compile karma
       - save_cache:
-          key: mvn-browser-test-{{ checksum "shadow-cljs.edn" }}
+          key: mvn-{{ checksum "shadow-cljs.edn" }}
           paths:
             - "~/.m2"
       - run:

@@ -1,0 +1,9 @@
+{:source-paths ["src" "test"]
+ :builds {:karma {:target :karma
+                  :output-to "target/ci.js"
+                  :ns-regex "-test$"}
+          :test     {:target    :browser-test
+                     :test-dir  "target/js/test"
+                     :ns-regexp "-test$"
+                     :devtools  {:http-port          8021
+                                 :http-root          "target/js/test"}}}}
