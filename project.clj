@@ -4,11 +4,10 @@
   :license {:name "MIT"}
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo/"
-                                     :signing {:gpg-key "19D0D9F5D596CD49"}
+                                     :signing false
                                      :username :env
                                      :password :env}]
                         ["snapshots" {:url "https://clojars.org/repo/"
-                                      :signing {:gpg-key "19D0D9F5D596CD49"}
                                       :username :env
                                       :password :env}]]
 
