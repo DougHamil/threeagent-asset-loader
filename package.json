@@ -5,7 +5,9 @@
     "watch-test": "shadow-cljs watch test"
   },
   "dependencies": {
-    "three": "^0.125.0"
+    "howler": "^2.2.3",
+    "three": "^0.125.0",
+    "troika-three-text": "^0.42.0"
   },
   "devDependencies": {
     "karma": "^6.2.0",

@@ -1,9 +1,10 @@
 {:source-paths ["src" "test"]
+ :dependencies [[camel-snake-kebab "0.4.2"]]
  :builds {:karma {:target :karma
                   :output-to "target/ci.js"
                   :ns-regex "-test$"}
           :test     {:target    :browser-test
-                     :test-dir  "target/js/test"
+                     :test-dir  "public_test"
                      :ns-regexp "-test$"
                      :devtools  {:http-port          8021
-                                 :http-root          "target/js/test"}}}}
+                                 :http-root          "public_test"}}}}

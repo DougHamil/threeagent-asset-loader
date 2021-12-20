@@ -1,6 +1,8 @@
 node_modules/
 resources/public/js
 examples/public/js
+public_test/js
+public_test/index.html
 
 /**/.shadow-cljs
 

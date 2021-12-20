@@ -23,7 +23,7 @@
   (.set (.-scale obj) scale scale scale)
   obj)
 
-(defn- apply-shadow! [^three/Object3D obj cast-shadow receive-shadow]
+(defn- apply-shadow! [cast-shadow receive-shadow ^three/Object3D obj]
   (.traverse obj (fn [^js obj]
                    (set! (.-castShadow obj) cast-shadow)
                    (set! (.-receiveShadow obj) receive-shadow)))
@@ -40,7 +40,7 @@
     (res (preprocess! model-root cfg))))
                     
 (defn- on-error [path rej error]
-  (js/console.error "Failed to load model at path %s due to error:\n" error)
+  (js/console.error "Failed to load model at path %s due to error:\n%o" path error)
   (rej [path error]))
 
 (defn loader [_key path cfg]
