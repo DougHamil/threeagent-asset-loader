@@ -20,6 +20,8 @@ jobs:
       - restore_cache:
           keys:
             - npm-browser-test-{{ checksum "package-lock.json" }}
+      - restore_cache:
+          keys:
             - mvn-browser-test-{{ checksum "shadow-cljs.edn" }}
       - run: npm ci
       - save_cache:
