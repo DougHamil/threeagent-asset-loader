@@ -38,7 +38,7 @@ jobs:
     steps:
       - checkout
       - run:
-          command: echo -e "$GPG_KEY" | gpg --import
+          command: echo -e "$GPG_SIGNING_KEY" | gpg --import
       - run:
           name: Deploying to clojars
           command: lein deploy
@@ -48,16 +48,16 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "04:0f:c2:c2:05:9e:ba:ea:eb:73:ac:54:ad:3f:2e:40"
+            - "a6:26:0e:aa:89:d1:db:6c:5b:26:bb:46:d2:2d:21:59"
       - checkout
       - run:
-          command: echo -e "$GPG_KEY" | gpg --import
+          command: echo -e "$GPG_SIGNING_KEY" | gpg --import
       - run:
           name: Git Config
           command: |
             git config --global user.email "doug.hamil@gmail.com"
             git config --global user.name "CircleCI Release Script"
-            git config --global user.signingkey C89350FC
+            git config --global user.signingkey $GPG_SIGNING_KEY_ID
             git remote set-url origin https://github.com/DougHamil/threeagent-asset-loader.git
       - run:
           name: Release rc
@@ -71,7 +71,7 @@ workflows:
             - checkout
             - add_ssh_keys:
                 fingerprints:
-                  - "04:0f:c2:c2:05:9e:ba:ea:eb:73:ac:54:ad:3f:2e:40"
+                  - "a6:26:0e:aa:89:d1:db:6c:5b:26:bb:46:d2:2d:21:59"
           branch: main
           commit-message: "Update CHANGELOG"
           git-push: true
@@ -83,8 +83,10 @@ workflows:
 
   build-test-publish:
     jobs:
-      - test:
+      - test
       - deploy_snapshot:
+          context:
+            - clojars
           filters:
             branches:
               only:
@@ -101,6 +103,8 @@ workflows:
             - test
 
       - release:
+          context:
+            - clojars
           filters:
             branches:
               only: /^release$/

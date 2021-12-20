@@ -2,7 +2,6 @@
   (:require ["three/examples/jsm/loaders/GLTFLoader" :refer [GLTFLoader]]
             ["three/examples/jsm/loaders/FBXLoader" :refer [FBXLoader]]
             ["three" :as three]
-            [clojure.string :as string]
             [threeagent.assets.pool :as pool]))
 
 (def ^:private gltf-loader (delay (GLTFLoader.)))
@@ -14,7 +13,7 @@
 
 (defn- select-loader [path]
   (->> loaders-by-ext
-       (filter (fn [[regex delayed-loader]]
+       (filter (fn [[regex _loader]]
                  (re-matches regex path)))
        (map second)
        (first)
