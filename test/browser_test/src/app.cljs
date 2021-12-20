@@ -4,9 +4,5 @@
 
 (enable-console-print!)
 
-(deftest noop-test
-  (testing "NOOP test"
-    (is (= 1 1))))
-
 (defn ^:export run-all [karma]
   (run-all-tests karma))
