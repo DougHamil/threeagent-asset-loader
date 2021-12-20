@@ -5,6 +5,7 @@ executors:
     docker:
       - image: douggernaut/threeagent-ci:0.0.1
     working_directory: ~/app
+    resource_class: small
 
 orbs:
   changelog: onimur/github-changelog-generator@2.1.9
