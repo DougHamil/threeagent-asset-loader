@@ -1,3 +1,7 @@
-(ns app)
+(ns app
+  (:require [jx.reporter.karma :refer-macros [run-all-tests]]))
 
-(defn main [])
+(enable-console-print!)
+
+(defn ^:export run-all [karma]
+  (run-all-tests karma))
