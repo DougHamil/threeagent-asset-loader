@@ -1,7 +1,7 @@
 {:source-paths ["src" "test"]
  :dependencies [[camel-snake-kebab "0.4.2"]]
  :builds {:karma {:target :karma
-                  :output-to "target/ci.js"
+                  :output-to "public_test/ci.js"
                   :ns-regex "-test$"}
           :test     {:target    :browser-test
                      :test-dir  "public_test"

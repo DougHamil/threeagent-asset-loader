@@ -3,6 +3,7 @@ resources/public/js
 examples/public/js
 public_test/js
 public_test/index.html
+public_test/ci.js
 
 /**/.shadow-cljs
 
