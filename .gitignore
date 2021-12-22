@@ -5,6 +5,8 @@ public_test/js
 public_test/index.html
 public_test/ci.js
 
+.clj-kondo/
+
 /**/.shadow-cljs
 
 .expo/
