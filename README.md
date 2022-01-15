@@ -127,6 +127,6 @@ It is recommended to define a custom Threeagent `IEntityType` specifically for d
       model))
   (destroy! [_ _ ^three/Object3D obj {:keys [model-key]}]
     (let [model-pool (get @asset-db model-key)]
-      (pools/return! model-pool obj))))
+      (pool/return! model-pool obj))))
 
 ```
