@@ -1,8 +1,11 @@
 # Threeagent Asset Loader
+[![CircleCI](https://circleci.com/gh/DougHamil/threeagent-asset-loader/tree/main.svg?style=svg)](https://circleci.com/gh/DougHamil/threeagent-asset-loader/tree/main)
+[![cljdoc badge](https://cljdoc.org/badge/com.github.doughamil/threeagent-asset-loader)](https://cljdoc.org/d/com.github.doughamil/threeagent-asset-loader)
 
 This library can be used to load ThreeJS assets (models, textures, audio, etc) and store them in an atom.
 
 ## Installation
+[![Clojars Project](https://img.shields.io/clojars/v/com.github.doughamil/threeagent-asset-loader.svg)](https://clojars.org/com.github.doughamil/threeagent-asset-loader)
 
 1. Add a dependency on this library to your `shadow-cljs.edn`
 2. Install transient JS dependencies via `npm`:
