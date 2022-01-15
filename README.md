@@ -95,7 +95,7 @@ Example:
 ```
 
 #### Pooling
-When you define a `pool-size`, you must use the provided `threeagent.assets.pool` namespace functions to claim/return models from/to the pool.
+When you define a `:pool-size`, you must use the provided `threeagent.assets.pool` namespace functions to claim/return models from/to the pool.
 
 For example:
 ```clojure
@@ -114,5 +114,19 @@ For example:
 It is recommended to define a custom Threeagent `IEntityType` specifically for dealing with pooled models. For example:
 
 ```clojure
+(ns my-app.model-entity-type
+  (:require [my-app.databases :refer [asset-db]] ; `asset-db` holds our loaded assets
+            [threeagent.assets.pool :as pool]
+            [threeagent.entity :refer [IEntityType]]))
+
+(deftype ModelEntity []
+  IEntityType
+  (create [_ _ {:keys [model-key]}]
+    (let [model-pool (get @asset-db model-key)
+          model (pool/claim! model-pool)]
+      model))
+  (destroy! [_ _ ^three/Object3D obj {:keys [model-key]}]
+    (let [model-pool (get @asset-db model-key)]
+      (pools/return! model-pool obj))))
 
 ```
