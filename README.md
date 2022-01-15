@@ -150,3 +150,38 @@ We can define the [options](https://github.com/goldfire/howler.js#options) used 
 ;; -- play sprite
 (.play (:sfx/impacts @asset-db) "1")
 ```
+
+### font-troika-loader
+
+The `threeagent.assets/font-troika-loader` is used to [preload fonts](https://github.com/protectwise/troika/tree/master/packages/troika-three-text) for usage with the [troika-three-text](https://github.com/protectwise/troika/tree/master/packages/troika-three-text) library. 
+
+The loaded value will be the font file's path, which can be set as the `font` property on a Troika `Text` instance:
+
+```clojure
+["fonts" {:loader assets/font-troika-loader}
+  ["menu_font.ttf" :font/main-menu {:characters ["a" "b" "c" "d" "1" "2" "3"]}]]
+  
+;; Usage
+(let [text (troika/Text.)
+      font (:font/main-menu @asset-db)]
+  (set! (.-font text) font)
+  (set! (.-text text) "abc")
+  (.sync text)
+  (.add my-threejs-scene text))
+```
+
+### texture-loader
+
+The `threeagent.assets/texture-loader` is used to load [ThreeJS Textures](https://threejs.org/docs/#api/en/textures/Texture).
+It uses the default [ThreeJS TextureLoader](https://threejs.org/docs/#api/en/loaders/TextureLoader) to load the texture file.
+
+We can configure the loaded `Texture` instance using the configuration map:
+```clojure
+["textures" {:loader assets/texture-loader}
+  ["grid.png" :texture/grid {:repeat {:x 4
+                                      :y 4}
+                             :rotation 0.4
+                             :wrap-s three/RepeatWrapping
+                             :wrap-t three/RepeatWrapping
+                             :premultiply-alpha true}]]
+```
