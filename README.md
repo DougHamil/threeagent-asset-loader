@@ -62,3 +62,57 @@ In our application, we'd define our asset tree and load it like this:
   (assets/load! asset-db asset-tree))
 ```
 
+After the promise returned from `assets/load!` completes, we can fetch assets from our `asset-db` using its key:
+```clojure
+(ns my.app.scene
+  (:require [my.app :refer [asset-db]]))
+
+(defn some-threeagent-component []
+  [:object
+   [:box {:material {:map (:texture/tile @asset-db)}}]])
+```
+
+## Loaders
+
+This library comes with loaders for common types of assets: models, textures, audio, and fonts. These loaders are
+wrappers around the standard ThreeJS loaders.
+
+### model-loader
+
+The `threeagent.assets/model-loader` is used to load 3D models. It currently supports GLTF and FBX files using the `GLTFLoader` and `FBXLoader` provided by ThreeJS.
+
+Optionally, this loader can create a pool for each loaded model. This is useful when you need to add multiple copies of a model to your scene.
+
+Example:
+```clojure
+  [["assets"
+    ["models" {:loader assets/model-loader}
+      ;; Load our alien.glb file, and create a pool with 5 copies of the model:
+      ["alien.glb" :model/alien {:pool-size 5}]
+
+      ;; Load our robot.fbx file, and set the scale of the loaded model to [10, 10, 10]:
+      ["robot.fbx" :model/robot {:scale 10}]]]]
+```
+
+#### Pooling
+When you define a `pool-size`, you must use the provided `threeagent.assets.pool` namespace functions to claim/return models from/to the pool.
+
+For example:
+```clojure
+(ns my.app.scene
+  (:require [my.app :refer [asset-db]]
+            [threeagent.assets.pool :as pool]))
+
+(defn my-component []
+  (let [model-pool (:model/alien @asset-db)
+        model (pool/claim! model-pool)]
+    [:object
+      ^{:on-removed #(pool/return! model-pool model)} ;; Returns the model to the pool when this object is removed from the scene
+      [:instance {:object model}]]))
+```
+
+It is recommended to define a custom Threeagent `IEntityType` specifically for dealing with pooled models. For example:
+
+```clojure
+
+```
