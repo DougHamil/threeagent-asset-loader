@@ -139,8 +139,8 @@ We can define the [options](https://github.com/goldfire/howler.js#options) used 
 
 ```clojure
 ["audio" {:loader assets/audio-howler-loader}
-  ["impacts.ogg" :sfx/impacts {:sprite {"1" [0 499]
-                                        "2" [500 1000]}
+  ["impacts.ogg" :sfx/impacts {:sprite {"1" [0 500] ;; Defined as [offset duration]
+                                        "2" [500 200]}
                                :volume 0.2}]
   ["music.ogg" :music/main-menu {:loop true}]]
 

@@ -24,7 +24,7 @@
   (testing "audio sprite files load successfully"
     (async done
            (-> (sut/loader :audio/good "/assets/audio/good.ogg" {:sprite {"a" [0 100]
-                                                                          "b" [50 100]}})
+                                                                          "b" [100 100]}})
                (.then (fn [audio]
                         (is (some? audio))
                         (done)))
