@@ -8,7 +8,9 @@
     ["/models" {:loader sut/model-loader}
      ["alien.glb" :model/alien {}]]
     ["/textures" {:loader sut/texture-loader}
-     ["black.png" :texture/black {}]]]])
+     ["black.png" :texture/black {}]]
+    ["/audio" {:loader sut/audio-howler-loader}
+     ["good.ogg" :audio/good {}]]]])
 
 (deftest loaders-test
   (async done
@@ -17,6 +19,7 @@
                (.then (fn []
                         (is (some? (:model/alien @db)))
                         (is (some? (:texture/black @db)))
+                        (is (some? (:audio/good @db)))
                         (done)))
                (.catch (fn [error]
                          (is (nil? error))

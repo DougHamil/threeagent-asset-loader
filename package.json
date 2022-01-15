@@ -2,6 +2,7 @@
   "scripts": {
     "build-test": "shadow-cljs compile karma",
     "test": "karma start --single-run",
+    "test-once": "shadow-cljs compile karma && karma start --single-run",
     "watch-test": "shadow-cljs watch test"
   },
   "dependencies": {
