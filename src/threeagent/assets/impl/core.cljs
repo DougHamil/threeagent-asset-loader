@@ -105,7 +105,13 @@
                                               data
                                               middleware)]
                            (swap! database assoc key result)
-                           result))))]
+                           result)))
+                (.catch (fn [err]
+                          (js/console.error "Failed to load asset %s at path %s due to error:\n%o"
+                                            key
+                                            path
+                                            err)
+                          (throw err))))]
       (swap! promises assoc key p)
       p)))
 
