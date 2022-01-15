@@ -10,7 +10,7 @@
                          (is (some? err))
                          (done)))))))
 
-(deftest texture-properties-test
+(deftest typed-props-test
   (testing "Vector2 typed properties work"
     (async done
            (-> (sut/loader :texture/black "/assets/textures/black.png" {:repeat {:x 2
@@ -21,3 +21,15 @@
                (.catch (fn [err]
                          (is (nil? err))
                          (done)))))))
+
+(deftest camel-cased-props-test
+  (testing "camelCased properties work"
+    (async done
+           (-> (sut/loader :texture/black "/assets/textures/black.png" {:premultiply-alpha true})
+               (.then (fn [texture]
+                        (is (.-premultiplyAlpha texture))
+                        (done)))
+               (.catch (fn [err]
+                         (is (nil? err))
+                         (done)))))))
+
