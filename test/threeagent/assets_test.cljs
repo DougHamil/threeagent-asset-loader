@@ -24,3 +24,16 @@
                (.catch (fn [error]
                          (is (nil? error))
                          (done)))))))
+
+(def ^:private bad-asset-tree
+  [["/assets"
+    ["/models" {:loader sut/model-loader}
+     ["missing.glb" :model/missing {}]]]])
+
+(deftest failed-load-test
+  (async done
+         (let [db (atom {})]
+           (-> (sut/load! db bad-asset-tree)
+               (.catch (fn [error]
+                         (is (some? error))
+                         (done)))))))

@@ -39,14 +39,10 @@
   (let [model-root (or (.-scene model) model)]
     (res (preprocess! model-root cfg))))
                     
-(defn- on-error [path rej error]
-  (js/console.error "Failed to load model at path %s due to error:\n%o" path error)
-  (rej [path error]))
-
 (defn loader [_key path cfg]
   (js/Promise. (fn [res rej]
                  (.load (select-loader path) path
                         #(on-load res cfg %)
                         nil
-                        #(on-error path rej %)))))
+                        #(rej %)))))
 

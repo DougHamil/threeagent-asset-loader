@@ -108,7 +108,7 @@
                            result)))
                 (.catch (fn [err]
                           (js/console.error "Failed to load asset %s at path %s due to error:\n%o"
-                                            key
+                                            (str key)
                                             path
                                             err)
                           (throw err))))]
