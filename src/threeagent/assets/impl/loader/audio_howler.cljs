@@ -8,7 +8,7 @@
   ;; TODO: Wrap Howler loading in proper promise
   (let [error-cb (partial on-error path)]
     (js/Promise. (fn [res rej]
-                     (res [(Howl. (clj->js {:src path
-                                            :volume (or volume 1.0)
-                                            :onloaderror error-cb}))])))))
+                     (res (Howl. (clj->js {:src path
+                                           :volume (or volume 1.0)
+                                           :onloaderror error-cb})))))))
 
