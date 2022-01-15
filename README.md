@@ -53,7 +53,7 @@ In our application, we'd define our asset tree and load it like this:
         ["menu_accept.ogg" :sfx/menu-accept {}]
         ["menu_decline.ogg" :sfx/menu-decline {}]]
       ["music"
-        ["main_menu.ogg" :music/-main-menu {}]]]]])
+        ["main_menu.ogg" :music/main-menu {}]]]]])
         
 (defn load-assets!
  "Loads all of the asset files, called during app initialization.
@@ -115,7 +115,7 @@ It is recommended to define a custom Threeagent `IEntityType` specifically for d
 
 ```clojure
 (ns my-app.model-entity-type
-  (:require [my-app.databases :refer [asset-db]] ; `asset-db` holds our loaded assets
+  (:require [my.app :refer [asset-db]]
             [threeagent.assets.pool :as pool]
             [threeagent.entity :refer [IEntityType]]))
 
@@ -129,4 +129,24 @@ It is recommended to define a custom Threeagent `IEntityType` specifically for d
     (let [model-pool (get @asset-db model-key)]
       (pool/return! model-pool obj))))
 
+```
+
+### audio-howler-loader
+
+The `threeagent.assets/audio-howler-loader` is used to load audio files as [Howler.js](https://github.com/goldfire/howler.js#documentation) `Howl` instances.
+
+We can define the [options](https://github.com/goldfire/howler.js#options) used to construct the `Howl` instance via the asset properties map. For example:
+
+```clojure
+["audio" {:loader assets/audio-howler-loader}
+  ["impacts.ogg" :sfx/impacts {:sprite {"1" [0 499]
+                                        "2" [500 1000]}
+                               :volume 0.2}]
+  ["music.ogg" :music/main-menu {:loop true}]]
+
+;; Usage
+;; -- play music
+(.play (:music/main-menu @asset-db))
+;; -- play sprite
+(.play (:sfx/impacts @asset-db) "1")
 ```
