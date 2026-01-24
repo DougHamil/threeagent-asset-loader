@@ -243,3 +243,40 @@ By default, all string keys in maps are converted to keywords. This can be disab
   (println (:name config))
   (println (get-in config [:settings :debug])))
 ```
+
+## Development
+
+### Running Tests
+
+```bash
+npm ci
+npm run test-once
+```
+
+For watch mode during development:
+```bash
+npm run watch-test
+```
+
+### Releasing
+
+Releases are managed through CircleCI and deployed to Clojars.
+
+1. Push to the `release` branch:
+   ```bash
+   git checkout -b release
+   git push origin release
+   ```
+
+2. Wait for tests to pass in CircleCI
+
+3. Approve the release in the CircleCI UI (there's a manual hold step)
+
+4. The release job will automatically:
+   - Bump the version from SNAPSHOT to release
+   - Tag the release with `vX.X.X`
+   - Deploy to Clojars
+   - Bump to the next SNAPSHOT version
+   - Merge back to `main`
+
+Snapshots are automatically deployed to Clojars on every push to `main`.
