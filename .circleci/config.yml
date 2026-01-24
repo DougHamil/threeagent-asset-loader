@@ -67,7 +67,7 @@ jobs:
             git remote set-url origin https://github.com/DougHamil/threeagent-asset-loader.git
       - run:
           name: Import GPG key
-          command: echo $GPG_KEY | base64 -d | gpg --import
+          command: echo -e "$GPG_KEY" | gpg --import
       - run:
           name: Release rc
           command: lein release :patch
