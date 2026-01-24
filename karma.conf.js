@@ -11,6 +11,13 @@ module.exports = function(config) {
               served: true,
               watched: false,
               nocache: false
+            },
+            {
+              pattern: "./*.zip",
+              included: false,
+              served: true,
+              watched: false,
+              nocache: false
             }],
     frameworks: ['cljs-test'],
     plugins: ['karma-cljs-test', 'karma-chrome-launcher'],

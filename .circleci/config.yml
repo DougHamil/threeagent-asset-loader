@@ -6,13 +6,18 @@ executors:
       - image: douggernaut/threeagent-ci:0.0.1
     working_directory: ~/app
     resource_class: small
+  test-executor:
+    docker:
+      - image: cimg/openjdk:21.0-browsers
+    working_directory: ~/app
+    resource_class: small
 
 orbs:
   changelog: onimur/github-changelog-generator@2.1.9
 
 jobs:
   test:
-    executor: ci-executor
+    executor: test-executor
     steps:
       - checkout
       - restore_cache:

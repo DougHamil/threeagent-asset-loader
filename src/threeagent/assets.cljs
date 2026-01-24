@@ -1,5 +1,6 @@
 (ns threeagent.assets
   (:require [threeagent.assets.impl.core :as impl]
+            [threeagent.assets.impl.zip :as zip]
             [threeagent.assets.impl.loader.model :as model]
             [threeagent.assets.impl.loader.texture :as texture]
             [threeagent.assets.impl.loader.audio-howler :as audio-howler]
@@ -9,10 +10,36 @@
   "Loads the assets defined in the `asset-tree` into the `asset-database` atom.
 
    Returns a Promise:
-    * on success: all assets have been loaded into the `asset-database` 
+    * on success: all assets have been loaded into the `asset-database`
     * on failure: one or more assets have failed to load. See the console for error messages"
   [asset-database asset-tree]
   (impl/load! asset-database asset-tree))
+
+(defn load-zip!
+  "Loads assets from a zip file into the `asset-database` atom.
+
+   The zip file is downloaded, extracted to memory, and assets are loaded
+   from the extracted files using ObjectURLs.
+
+   Options:
+     :base-path - Path prefix inside the zip to strip. Use this if the zip
+                  has a root folder (e.g. if zip contains assets/models/foo.glb
+                  and your tree references models/foo.glb, set base-path to \"assets\")
+
+   Returns a Promise:
+    * on success: all assets have been loaded into the `asset-database`
+    * on failure: one or more assets have failed to load. See the console for error messages
+
+   Example:
+     (load-zip! db \"./assets.zip\"
+       [[\"models\" {:loader model-loader}
+         [\"alien.glb\" :model/alien {}]]
+        [\"textures\" {:loader texture-loader}
+         [\"tile.png\" :texture/tile {}]]])"
+  ([asset-database zip-url asset-tree]
+   (load-zip! asset-database zip-url asset-tree {}))
+  ([asset-database zip-url asset-tree {:keys [base-path]}]
+   (zip/load-zip! asset-database zip-url asset-tree {:base-path (or base-path "")})))
 
 (def ref impl/ref)
 
