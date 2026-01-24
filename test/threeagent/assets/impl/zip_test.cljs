@@ -9,7 +9,9 @@
    ["textures" {:loader sut/texture-loader}
     ["black.png" :texture/black {}]]
    ["audio" {:loader sut/audio-howler-loader}
-    ["good.ogg" :audio/good {}]]])
+    ["good.ogg" :audio/good {}]]
+   ["data" {:loader sut/data-loader}
+    ["config.json" :data/config {}]]])
 
 (deftest load-zip-test
   (async done
@@ -19,6 +21,9 @@
                         (is (some? (:model/alien @db)) "Model should be loaded from zip")
                         (is (some? (:texture/black @db)) "Texture should be loaded from zip")
                         (is (some? (:audio/good @db)) "Audio should be loaded from zip")
+                        (is (some? (:data/config @db)) "Data should be loaded from zip")
+                        (is (= "zip-config" (:name (:data/config @db))) "Data content should be parsed correctly")
+                        (is (= true (:enabled (:data/config @db))) "Data keys should be keywordized")
                         (done)))
                (.catch (fn [error]
                          (js/console.error "load-zip-test failed:" error)

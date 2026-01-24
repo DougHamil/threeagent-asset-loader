@@ -1,0 +1,6 @@
+{:level-1 {:name "Tutorial"
+           :difficulty :easy
+           :enemies [10 20 30]}
+ :level-2 {:name "Forest"
+           :difficulty :medium
+           :enemies [50 60 70]}}

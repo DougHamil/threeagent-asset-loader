@@ -4,7 +4,8 @@
             [threeagent.assets.impl.loader.model :as model]
             [threeagent.assets.impl.loader.texture :as texture]
             [threeagent.assets.impl.loader.audio-howler :as audio-howler]
-            [threeagent.assets.impl.loader.font-troika :as font-troika]))
+            [threeagent.assets.impl.loader.font-troika :as font-troika]
+            [threeagent.assets.impl.loader.data :as data]))
 
 (defn load!
   "Loads the assets defined in the `asset-tree` into the `asset-database` atom.
@@ -58,4 +59,11 @@
 (def font-troika-loader
   "Loader for `three-troika-text` fonts. Should be used to pre-load font files"
   font-troika/loader)
-  
+
+(def data-loader
+  "Loader for data files (JSON, EDN). Parses content as Clojure data structures.
+
+   Options:
+     :keywordize-keys - Convert string keys to keywords (default: true)"
+  data/loader)
+
