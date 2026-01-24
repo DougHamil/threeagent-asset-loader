@@ -78,9 +78,9 @@
 
 (declare get-promise)
 
-(defn- ref->promise [nodes promises database references]
+(defn- ref->promise [nodes promises database url-resolver references]
   (js/Promise.all (map
-                   #(get-promise nodes promises database (get nodes %))
+                   #(get-promise nodes promises database url-resolver (get nodes %))
                    references)))
 
 (defn- resolve-config-refs [database config]
@@ -90,13 +90,14 @@
                      (get @database (first n))
                      n)))))
 
-(defn- get-promise [nodes promises database {:keys [key path config references loader middleware]}]
+(defn- get-promise [nodes promises database url-resolver {:keys [key path config references loader middleware]}]
   (if-let [p (get @promises key)]
     p
-    (let [p (-> (ref->promise nodes promises database references)
+    (let [resolved-path (url-resolver path)
+          p (-> (ref->promise nodes promises database url-resolver references)
                 (.then (fn [_]
                          (let [resolved-config (resolve-config-refs database config)]
-                           (-> (loader key path resolved-config)
+                           (-> (loader key resolved-path resolved-config)
                                (.then (fn [data]
                                         [resolved-config data]))))))
                 (.then (fn [[resolved-config data]]
@@ -115,14 +116,21 @@
       (swap! promises assoc key p)
       p)))
 
-(defn load! [database tree]
-  (let [nodes (->> tree
-                   (mapcat (partial visit {:path "./" :middleware []}))
-                   (validate!)
-                   (into {}))
-        promises (atom {})]
-    (js/Promise.all (->> (vals nodes)
-                         (map (partial get-promise nodes promises database))))))
+(defn load!
+  "Loads the asset tree into the database.
+
+   Optional url-resolver is a function (fn [path] -> resolved-url) that transforms
+   asset paths before passing to loaders. Defaults to identity for standard HTTP loading."
+  ([database tree]
+   (load! database tree identity))
+  ([database tree url-resolver]
+   (let [nodes (->> tree
+                    (mapcat (partial visit {:path "./" :middleware []}))
+                    (validate!)
+                    (into {}))
+         promises (atom {})]
+     (js/Promise.all (->> (vals nodes)
+                          (map (partial get-promise nodes promises database url-resolver)))))))
 
 (defn ref [asset-key]
   ^{:asset-ref true}
