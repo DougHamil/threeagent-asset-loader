@@ -1,0 +1,9 @@
+{
+  "name": "test-config",
+  "version": 1,
+  "settings": {
+    "debug": true,
+    "maxRetries": 3
+  },
+  "tags": ["alpha", "beta"]
+}

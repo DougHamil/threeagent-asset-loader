@@ -216,3 +216,30 @@ We can configure the loaded `Texture` instance using the configuration map:
                              :wrap-t three/RepeatWrapping
                              :premultiply-alpha true}]]
 ```
+
+### data-loader
+
+The `threeagent.assets/data-loader` is used to load data files (JSON and EDN) and parse them as Clojure data structures.
+
+File type is detected by extension:
+- `.json` files are parsed with `JSON.parse` and converted to Clojure data
+- `.edn` files are parsed with `clojure.edn/read-string`
+
+By default, all string keys in maps are converted to keywords. This can be disabled with the `:keywordize-keys` option:
+
+```clojure
+["data" {:loader assets/data-loader}
+  ;; JSON file - keys will be keywordized by default
+  ["config.json" :data/config {}]
+
+  ;; EDN file
+  ["levels.edn" :data/levels {}]
+
+  ;; Keep string keys (don't keywordize)
+  ["external.json" :data/external {:keywordize-keys false}]]
+
+;; Usage
+(let [config (:data/config @asset-db)]
+  (println (:name config))
+  (println (get-in config [:settings :debug])))
+```
