@@ -75,6 +75,34 @@ After the promise returned from `assets/load!` completes, we can fetch assets fr
    [:box {:material {:map (:texture/tile @asset-db)}}]])
 ```
 
+## Loading from a Zip File
+
+For faster loading, you can bundle your assets into a zip file and load them with `assets/load-zip!`. This downloads a single zip file, extracts it in memory, and loads assets from the extracted contents.
+
+```clojure
+(ns my.app
+  (:require [threeagent.assets :as assets]))
+
+(defonce asset-db (atom {}))
+
+;; The asset tree paths should match the structure inside the zip
+(def asset-tree
+  [["models" {:loader assets/model-loader}
+    ["alien.glb" :model/alien {}]
+    ["robot.glb" :model/robot {}]]
+   ["textures" {:loader assets/texture-loader}
+    ["tile.png" :texture/tile {}]]])
+
+(defn load-assets! []
+  (assets/load-zip! asset-db "./assets.zip" asset-tree))
+```
+
+If your zip file has a root folder (e.g., the zip contains `assets/models/alien.glb` instead of `models/alien.glb`), use the `:base-path` option:
+
+```clojure
+(assets/load-zip! asset-db "./assets.zip" asset-tree {:base-path "assets"})
+```
+
 ## Loaders
 
 This library comes with loaders for common types of assets: models, textures, audio, and fonts. These loaders are
