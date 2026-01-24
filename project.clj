@@ -3,8 +3,9 @@
   :url "https://github.com/DougHamil/threeagent-asset-loader"
   :license {:name "MIT"}
 
+  :sign-releases false
+
   :deploy-repositories [["releases" {:url "https://clojars.org/repo/"
-                                     :signing false
                                      :username :env
                                      :password :env}]
                         ["snapshots" {:url "https://clojars.org/repo/"
