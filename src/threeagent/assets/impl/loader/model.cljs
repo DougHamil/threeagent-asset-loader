@@ -1,7 +1,7 @@
 (ns threeagent.assets.impl.loader.model
   (:require ["three/addons/loaders/GLTFLoader.js" :refer [GLTFLoader]]
             ["three/addons/loaders/FBXLoader.js" :refer [FBXLoader]]
-            ["three" :as three]
+            ["three/webgpu" :as three]
             [threeagent.assets.pool :as pool]))
 
 (def ^:private gltf-loader (delay (GLTFLoader.)))

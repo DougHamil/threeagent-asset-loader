@@ -1,6 +1,6 @@
 (ns threeagent.assets.impl.util
   (:require [camel-snake-kebab.core :as csk]
-            ["three" :as three]))
+            ["three/webgpu" :as three]))
 
 (defn- ->vector2 [o]
   (cond

@@ -1,5 +1,5 @@
 (ns threeagent.assets.impl.loader.texture
-  (:require ["three" :as three]
+  (:require ["three/webgpu" :as three]
             [threeagent.assets.impl.util :refer [set-props-camel-case!]]))
 
 (def ^:private three-texture-loader (delay (three/TextureLoader.)))
