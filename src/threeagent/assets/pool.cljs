@@ -1,5 +1,5 @@
 (ns threeagent.assets.pool
-  (:require ["three/examples/jsm/utils/SkeletonUtils" :as SkeletonUtils]))
+  (:require ["three/addons/utils/SkeletonUtils.js" :as SkeletonUtils]))
 
 (defn create [count source]
   (let [pool (atom {})]

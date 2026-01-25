@@ -1,6 +1,6 @@
 (ns threeagent.assets.impl.loader.model
-  (:require ["three/examples/jsm/loaders/GLTFLoader" :refer [GLTFLoader]]
-            ["three/examples/jsm/loaders/FBXLoader" :refer [FBXLoader]]
+  (:require ["three/addons/loaders/GLTFLoader.js" :refer [GLTFLoader]]
+            ["three/addons/loaders/FBXLoader.js" :refer [FBXLoader]]
             ["three" :as three]
             [threeagent.assets.pool :as pool]))
 
