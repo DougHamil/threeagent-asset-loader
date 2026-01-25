@@ -1,7 +1,7 @@
 (ns threeagent.assets.impl.loader.model-test
   (:require [cljs.test :refer-macros [deftest is testing]]
-            ["three/examples/jsm/loaders/FBXLoader" :refer [FBXLoader]]
-            ["three/examples/jsm/loaders/GLTFLoader" :refer [GLTFLoader]]
+            ["three/addons/loaders/FBXLoader.js" :refer [FBXLoader]]
+            ["three/addons/loaders/GLTFLoader.js" :refer [GLTFLoader]]
             [threeagent.assets.impl.loader.model :as sut]))
 
 (deftest loader-selection-test
