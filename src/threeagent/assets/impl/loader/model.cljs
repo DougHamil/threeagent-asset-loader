@@ -37,6 +37,11 @@
 
 (defn- on-load [res cfg ^three/Object3D model]
   (let [model-root (or (.-scene model) model)]
+    ;; Preserve animation clips from GLTF result on the scene root
+    ;; so they survive pool cloning (pool copies source.animations to clones)
+    (when-let [anims (.-animations model)]
+      (when (pos? (.-length anims))
+        (set! (.-animations model-root) anims)))
     (res (preprocess! model-root cfg))))
                     
 (defn loader [_key path cfg]
