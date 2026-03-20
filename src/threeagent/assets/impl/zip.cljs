@@ -87,10 +87,15 @@
   "Creates a url-resolver function that maps asset paths to blob URLs.
    Appends original filename as URL hash fragment for loader type detection.
    Throws descriptive error for missing paths."
-  [url-map available-paths]
+  [url-map available-paths base-path]
   (fn [path]
-    (let [normalized (normalize-path path)]
-      (if-let [url (get url-map normalized)]
+    (let [normalized (normalize-path path)
+          ;; Strip base-path prefix to match the keys in url-map
+          lookup-key (if (and (seq base-path)
+                              (string/starts-with? normalized (str base-path "/")))
+                       (subs normalized (inc (count base-path)))
+                       normalized)]
+      (if-let [url (get url-map lookup-key)]
         ;; Append original filename as hash fragment so loaders can detect file type
         ;; The hash fragment is preserved for regex matching but ignored when fetching
         (let [filename (last (string/split normalized #"/"))]
@@ -98,6 +103,7 @@
         (throw (ex-info "Asset not found in zip file"
                         {:requested-path path
                          :normalized-path normalized
+                         :lookup-key lookup-key
                          :available-paths available-paths}))))))
 
 (defn- revoke-urls! [url-map]
@@ -120,7 +126,7 @@
         (.then (fn [url-map]
                  (reset! url-map-atom url-map)
                  (let [available-paths (vec (keys url-map))
-                       url-resolver (create-url-resolver url-map available-paths)]
+                       url-resolver (create-url-resolver url-map available-paths (or base-path ""))]
                    (core/load! database asset-tree url-resolver))))
         (.then (fn [result]
                  (when-let [url-map @url-map-atom]
