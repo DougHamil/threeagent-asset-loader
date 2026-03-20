@@ -97,7 +97,7 @@
           p (-> (ref->promise nodes promises database url-resolver references)
                 (.then (fn [_]
                          (let [resolved-config (resolve-config-refs database config)]
-                           (-> (loader key resolved-path resolved-config)
+                           (-> (loader key resolved-path resolved-config url-resolver path)
                                (.then (fn [data]
                                         [resolved-config data]))))))
                 (.then (fn [[resolved-config data]]
