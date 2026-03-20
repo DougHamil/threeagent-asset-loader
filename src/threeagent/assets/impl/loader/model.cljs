@@ -8,7 +8,7 @@
 (def ^:private default-gltf-loader (delay (GLTFLoader.)))
 (def ^:private default-fbx-loader (delay (FBXLoader.)))
 
-(defn- select-default-loader [path]
+(defn select-loader [path]
   (cond
     (re-matches #"(?i).+\.glb$" path) @default-gltf-loader
     (re-matches #"(?i).+\.gltf$" path) @default-gltf-loader
@@ -95,7 +95,7 @@
   ([_key path cfg resolve-url original-path]
    (let [ldr (if resolve-url
                (create-loader-with-manager path resolve-url original-path)
-               (select-default-loader path))]
+               (select-loader path))]
      (js/Promise. (fn [res rej]
                     (.load ldr path
                            #(on-load res cfg %)
