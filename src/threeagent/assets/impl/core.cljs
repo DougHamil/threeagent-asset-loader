@@ -78,9 +78,9 @@
 
 (declare get-promise)
 
-(defn- ref->promise [nodes promises database url-resolver references]
+(defn- ref->promise [nodes promises database url-resolver on-progress references]
   (js/Promise.all (map
-                   #(get-promise nodes promises database url-resolver (get nodes %))
+                   #(get-promise nodes promises database url-resolver on-progress (get nodes %))
                    references)))
 
 (defn- resolve-config-refs [database config]
@@ -90,11 +90,11 @@
                      (get @database (first n))
                      n)))))
 
-(defn- get-promise [nodes promises database url-resolver {:keys [key path config references loader middleware]}]
+(defn- get-promise [nodes promises database url-resolver on-progress {:keys [key path config references loader middleware]}]
   (if-let [p (get @promises key)]
     p
     (let [resolved-path (url-resolver path)
-          p (-> (ref->promise nodes promises database url-resolver references)
+          p (-> (ref->promise nodes promises database url-resolver on-progress references)
                 (.then (fn [_]
                          (let [resolved-config (resolve-config-refs database config)]
                            (-> (loader key resolved-path resolved-config url-resolver path)
@@ -106,6 +106,7 @@
                                               data
                                               middleware)]
                            (swap! database assoc key result)
+                           (when on-progress (on-progress))
                            result)))
                 (.catch (fn [err]
                           (js/console.error "Failed to load asset %s at path %s due to error:\n%o"
@@ -120,17 +121,27 @@
   "Loads the asset tree into the database.
 
    Optional url-resolver is a function (fn [path] -> resolved-url) that transforms
-   asset paths before passing to loaders. Defaults to identity for standard HTTP loading."
+   asset paths before passing to loaders. Defaults to identity for standard HTTP loading.
+
+   Optional on-progress is a function (fn [loaded total]) called after each asset loads."
   ([database tree]
-   (load! database tree identity))
+   (load! database tree identity nil))
   ([database tree url-resolver]
+   (load! database tree url-resolver nil))
+  ([database tree url-resolver on-progress]
    (let [nodes (->> tree
                     (mapcat (partial visit {:path "./" :middleware []}))
                     (validate!)
                     (into {}))
+         total (count nodes)
+         loaded (atom 0)
+         progress-fn (when on-progress
+                       (fn []
+                         (let [n (swap! loaded inc)]
+                           (on-progress n total))))
          promises (atom {})]
      (js/Promise.all (->> (vals nodes)
-                          (map (partial get-promise nodes promises database url-resolver)))))))
+                          (map (partial get-promise nodes promises database url-resolver progress-fn)))))))
 
 (defn ref [asset-key]
   ^{:asset-ref true}

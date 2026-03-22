@@ -114,10 +114,11 @@
   "Loads assets from a zip file into the asset database.
 
    Options:
-     :base-path - Path prefix inside the zip to strip (e.g. \"assets\" if zip contains assets/models/foo.glb)
+     :base-path    - Path prefix inside the zip to strip (e.g. \"assets\" if zip contains assets/models/foo.glb)
+     :on-progress  - Optional (fn [loaded total]) called after each asset loads.
 
    Returns a Promise that resolves when all assets are loaded."
-  [database zip-url asset-tree {:keys [base-path]}]
+  [database zip-url asset-tree {:keys [base-path on-progress]}]
   (let [url-map-atom (atom nil)]
     (-> (fetch-zip zip-url)
         (.then parse-zip)
@@ -127,7 +128,7 @@
                  (reset! url-map-atom url-map)
                  (let [available-paths (vec (keys url-map))
                        url-resolver (create-url-resolver url-map available-paths (or base-path ""))]
-                   (core/load! database asset-tree url-resolver))))
+                   (core/load! database asset-tree url-resolver on-progress))))
         (.then (fn [result]
                  (when-let [url-map @url-map-atom]
                    (revoke-urls! url-map))

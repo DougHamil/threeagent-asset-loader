@@ -10,11 +10,15 @@
 (defn load!
   "Loads the assets defined in the `asset-tree` into the `asset-database` atom.
 
+   Optional on-progress is a function (fn [loaded total]) called after each asset loads.
+
    Returns a Promise:
     * on success: all assets have been loaded into the `asset-database`
     * on failure: one or more assets have failed to load. See the console for error messages"
-  [asset-database asset-tree]
-  (impl/load! asset-database asset-tree))
+  ([asset-database asset-tree]
+   (impl/load! asset-database asset-tree))
+  ([asset-database asset-tree on-progress]
+   (impl/load! asset-database asset-tree identity on-progress)))
 
 (defn load-zip!
   "Loads assets from a zip file into the `asset-database` atom.
@@ -39,8 +43,9 @@
          [\"tile.png\" :texture/tile {}]]])"
   ([asset-database zip-url asset-tree]
    (load-zip! asset-database zip-url asset-tree {}))
-  ([asset-database zip-url asset-tree {:keys [base-path]}]
-   (zip/load-zip! asset-database zip-url asset-tree {:base-path (or base-path "")})))
+  ([asset-database zip-url asset-tree {:keys [base-path on-progress]}]
+   (zip/load-zip! asset-database zip-url asset-tree {:base-path (or base-path "")
+                                                      :on-progress on-progress})))
 
 (def ref impl/ref)
 
