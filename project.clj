@@ -1,4 +1,4 @@
-(defproject com.github.doughamil/threeagent-asset-loader "0.0.3"
+(defproject com.github.doughamil/threeagent-asset-loader "0.0.4-SNAPSHOT"
   :description "Easier asset loading for threeagent apps"
   :url "https://github.com/DougHamil/threeagent-asset-loader"
   :license {:name "MIT"}
