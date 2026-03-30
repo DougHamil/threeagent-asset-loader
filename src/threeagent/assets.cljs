@@ -5,7 +5,8 @@
             [threeagent.assets.impl.loader.texture :as texture]
             [threeagent.assets.impl.loader.audio-howler :as audio-howler]
             [threeagent.assets.impl.loader.font-troika :as font-troika]
-            [threeagent.assets.impl.loader.data :as data]))
+            [threeagent.assets.impl.loader.data :as data]
+            [threeagent.assets.impl.loader.hdri :as hdri]))
 
 (defn load!
   "Loads the assets defined in the `asset-tree` into the `asset-database` atom.
@@ -71,4 +72,9 @@
    Options:
      :keywordize-keys - Convert string keys to keywords (default: true)"
   data/loader)
+
+(def hdri-loader
+  "Loader for EXR HDR images. Returns an equirectangular texture.
+   Use with threeagent.gamekit.hdri/apply-environment! to set as scene IBL."
+  hdri/loader)
 
