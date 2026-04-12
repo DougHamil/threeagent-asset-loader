@@ -45,12 +45,14 @@
     (mapcat (partial visit ctx) rest)))
         
 (defmethod visit :leaf [ctx [path key config]]
-  {key {:key key
-        :config config
-        :middleware (:middleware ctx)
-        :references (find-refs config)
-        :loader (:loader ctx)
-        :path (join-path (:path ctx) path)}})
+  (let [leaf-mw (:middleware config [])
+        config  (dissoc config :middleware)]
+    {key {:key key
+          :config config
+          :middleware (concat leaf-mw (:middleware ctx []))
+          :references (find-refs config)
+          :loader (:loader ctx)
+          :path (join-path (:path ctx) path)}}))
 
 (defn- detect-duplicates! [nodes]
   (let [dupes (->> nodes

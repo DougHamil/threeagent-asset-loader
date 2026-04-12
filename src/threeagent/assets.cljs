@@ -31,6 +31,11 @@
      :base-path - Path prefix inside the zip to strip. Use this if the zip
                   has a root folder (e.g. if zip contains assets/models/foo.glb
                   and your tree references models/foo.glb, set base-path to \"assets\")
+     :on-progress - Optional (fn [loaded total]) called after each asset loads.
+     :on-download-progress - Optional (fn [bytes-loaded bytes-total]) called
+                             while the zip file is downloading. bytes-total is
+                             nil when Content-Length is unavailable. Always
+                             fires once at completion with (final, final).
 
    Returns a Promise:
     * on success: all assets have been loaded into the `asset-database`
@@ -44,9 +49,10 @@
          [\"tile.png\" :texture/tile {}]]])"
   ([asset-database zip-url asset-tree]
    (load-zip! asset-database zip-url asset-tree {}))
-  ([asset-database zip-url asset-tree {:keys [base-path on-progress]}]
+  ([asset-database zip-url asset-tree {:keys [base-path on-progress on-download-progress]}]
    (zip/load-zip! asset-database zip-url asset-tree {:base-path (or base-path "")
-                                                      :on-progress on-progress})))
+                                                      :on-progress on-progress
+                                                      :on-download-progress on-download-progress})))
 
 (def ref impl/ref)
 

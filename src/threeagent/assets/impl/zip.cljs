@@ -37,15 +37,59 @@
     (string/starts-with? path "./") (subs 2)
     (string/starts-with? path "/") (subs 1)))
 
-(defn- fetch-zip [url]
+(defn- parse-content-length [^js response]
+  (let [raw (.. response -headers (get "Content-Length"))
+        n   (some-> raw js/parseInt)]
+    (when (and (number? n) (not (js/isNaN n)) (pos? n))
+      n)))
+
+(defn- stream-body
+  "Reads response.body as a stream, firing on-download-progress per chunk
+   with (bytes-loaded, bytes-total). bytes-total is nil when unknown.
+   Always fires once more at completion with (final, final) so callers
+   can reliably flip to 100% even when the header total was unavailable
+   or incorrect (e.g. gzip content-encoding).
+   Returns a Promise resolving to an ArrayBuffer."
+  [^js response on-download-progress]
+  (let [total  (parse-content-length response)
+        reader (.. response -body getReader)
+        chunks #js []
+        loaded (atom 0)]
+    (js/Promise.
+     (fn [resolve reject]
+       (letfn [(pump []
+                 (-> (.read reader)
+                     (.then (fn [^js res]
+                              (if (.-done res)
+                                (let [final @loaded]
+                                  (on-download-progress final final)
+                                  (-> (js/Blob. chunks)
+                                      (.arrayBuffer)
+                                      (.then resolve)
+                                      (.catch reject)))
+                                (let [chunk (.-value res)]
+                                  (.push chunks chunk)
+                                  (swap! loaded + (.-byteLength chunk))
+                                  (on-download-progress @loaded total)
+                                  (pump)))))
+                     (.catch reject)))]
+         (pump))))))
+
+(defn- fetch-zip [url on-download-progress]
   (-> (js/fetch url)
-      (.then (fn [response]
-               (if (.-ok response)
-                 (.arrayBuffer response)
+      (.then (fn [^js response]
+               (cond
+                 (not (.-ok response))
                  (throw (ex-info "Failed to fetch zip file"
                                  {:url url
                                   :status (.-status response)
-                                  :statusText (.-statusText response)})))))
+                                  :statusText (.-statusText response)}))
+
+                 on-download-progress
+                 (stream-body response on-download-progress)
+
+                 :else
+                 (.arrayBuffer response))))
       (.catch (fn [err]
                 (if (ex-data err)
                   (throw err)
@@ -114,13 +158,17 @@
   "Loads assets from a zip file into the asset database.
 
    Options:
-     :base-path    - Path prefix inside the zip to strip (e.g. \"assets\" if zip contains assets/models/foo.glb)
-     :on-progress  - Optional (fn [loaded total]) called after each asset loads.
+     :base-path             - Path prefix inside the zip to strip (e.g. \"assets\" if zip contains assets/models/foo.glb)
+     :on-progress           - Optional (fn [loaded total]) called after each asset loads.
+     :on-download-progress  - Optional (fn [bytes-loaded bytes-total]) called while
+                              the zip file is downloading. bytes-total is nil when
+                              the server does not provide a reliable Content-Length.
+                              Always fires once at completion with (final, final).
 
    Returns a Promise that resolves when all assets are loaded."
-  [database zip-url asset-tree {:keys [base-path on-progress]}]
+  [database zip-url asset-tree {:keys [base-path on-progress on-download-progress]}]
   (let [url-map-atom (atom nil)]
-    (-> (fetch-zip zip-url)
+    (-> (fetch-zip zip-url on-download-progress)
         (.then parse-zip)
         (.then (fn [zip]
                  (extract-files zip (or base-path ""))))

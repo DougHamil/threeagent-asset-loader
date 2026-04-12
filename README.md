@@ -103,6 +103,47 @@ If your zip file has a root folder (e.g., the zip contains `assets/models/alien.
 (assets/load-zip! asset-db "./assets.zip" asset-tree {:base-path "assets"})
 ```
 
+### Progress callbacks
+
+`load-zip!` accepts two independent progress callbacks, covering two different phases:
+
+```clojure
+(assets/load-zip! asset-db "./assets.zip" asset-tree
+  {:on-download-progress (fn [bytes-loaded bytes-total]
+                           ;; fires while the zip is downloading
+                           )
+   :on-progress (fn [loaded total]
+                  ;; fires once per asset after it is loaded from the extracted zip
+                  )})
+```
+
+| Callback | Phase | Units |
+| --- | --- | --- |
+| `:on-download-progress` | Fetching the zip over the network | Bytes |
+| `:on-progress` | Parsing each asset after the zip is extracted | Assets (items) |
+
+For a large zip, the download phase typically dominates wall-clock time — so `:on-download-progress` is what you'll want for a realistic loading bar.
+
+#### `:on-download-progress` details
+
+Signature: `(fn [bytes-loaded bytes-total])`
+
+- `bytes-loaded` — total bytes received so far. Monotonically non-decreasing.
+- `bytes-total` — total bytes expected, parsed from the `Content-Length` response header. **`nil` when unknown** (see caveats below).
+
+The callback is guaranteed to fire **at least once at completion** with `bytes-loaded == bytes-total` (both equal to the final received size), so callers can unconditionally flip a progress bar to 100% from the last call — even when the total was unknown during streaming.
+
+**Caveats:**
+- When the server omits `Content-Length` (or uses `Transfer-Encoding: chunked`), `bytes-total` will be `nil` during streaming. Render an indeterminate bar or show just the byte count in that case.
+- With `Content-Encoding: gzip`, the header reports compressed size while the bytes you see are decompressed — so intermediate progress may overshoot 100%. The completion call always corrects this with `(final, final)`.
+- For cross-origin fetches, the server must expose `Content-Length` via `Access-Control-Expose-Headers` for it to be visible to JavaScript.
+
+When `:on-download-progress` is not provided, the library uses a faster non-streaming fetch — there is no overhead if you don't need the callback.
+
+#### `:on-progress` details
+
+Signature: `(fn [loaded total])` — available on both `load!` and `load-zip!`. Fires once per asset after it has been fully loaded and middleware has run. Each asset counts as 1 regardless of size.
+
 ## Loaders
 
 This library comes with loaders for common types of assets: models, textures, audio, and fonts. These loaders are
@@ -243,6 +284,90 @@ By default, all string keys in maps are converted to keywords. This can be disab
   (println (:name config))
   (println (get-in config [:settings :debug])))
 ```
+
+## Middleware
+
+Middleware lets you post-process an asset's loaded value before it's stored in the database. Useful for attaching derived data (bounding boxes, collision shapes), tagging, or normalizing values without forking a loader.
+
+A middleware is a plain function:
+
+```clojure
+(fn [key data resolved-config] -> new-data)
+```
+
+- `key` — the asset's keyword
+- `data` — the loader's output (or the previous middleware's return value)
+- `resolved-config` — the leaf's config map, with any `(assets/ref :other)` entries already substituted with the loaded asset
+
+The return value becomes the input to the next middleware in the chain, and the final value is what lands in the asset database.
+
+### Attaching middleware
+
+Middleware can be attached at two levels.
+
+**Branch-scoped** — applies to every leaf beneath the branch:
+
+```clojure
+["models" {:loader assets/model-loader
+           :middleware [tag-with-category-mw]}
+  ["alien.glb" :model/alien {}]
+  ["robot.glb" :model/robot {}]]
+```
+
+**Leaf-scoped** — applies to one asset only:
+
+```clojure
+["models" {:loader assets/model-loader}
+  ["crate.glb" :model/crate {:scale 2
+                             :middleware [bounding-box-mw]}]
+  ["hero.glb" :model/hero {}]]
+```
+
+You can mix both — a leaf sees its own middleware *and* all middleware declared on branches above it.
+
+### Execution order
+
+For each asset, the loader pipeline runs in this order:
+
+1. Referenced assets (via `assets/ref`) are loaded first.
+2. The loader runs and returns the raw `data`.
+3. Middleware runs as a chain: **leaf middleware first, then branch middleware from innermost to outermost branch**. Each middleware receives the previous one's output.
+4. The final value is stored in the asset database under the asset's key.
+
+Given:
+
+```clojure
+["outer" {:loader my-loader :middleware [outer-mw]}
+  ["inner" {:middleware [inner-mw]}
+    ["thing.bin" :thing {:middleware [leaf-mw]}]]]
+```
+
+The chain for `:thing` runs as: `leaf-mw` → `inner-mw` → `outer-mw`.
+
+### Example: bounding-box middleware
+
+```clojure
+(defn bounding-box-mw [_key model _config]
+  (let [bbox (three/Box3.)]
+    (.setFromObject bbox model)
+    (set! (.. model -userData -boundingBox) bbox)
+    model))
+
+(def asset-tree
+  [["models" {:loader assets/model-loader}
+    ["crate.glb" :model/crate {:middleware [bounding-box-mw]}]
+    ["hero.glb"  :model/hero {}]]])
+
+;; usage, after load! resolves
+(.. (:model/crate @asset-db) -userData -boundingBox)
+```
+
+### Notes
+
+- Middleware is **synchronous**. Return a value, not a promise. If you need async work, write a custom loader instead.
+- `resolved-config` has `(assets/ref …)` values substituted with the actual loaded assets, so middleware can read sibling assets directly.
+- When a model uses `:pool-size`, the loader returns a pool atom (see [Pooling](#pooling)), not an `Object3D`. Middleware sees whatever the loader returned, so it must handle the pool shape if pooling is enabled.
+- `:middleware` is stripped from the config before the loader sees it, so middleware never collides with loader config keys.
 
 ## Development
 
