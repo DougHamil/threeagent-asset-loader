@@ -60,3 +60,28 @@
                  (.catch (fn [error]
                            (is (some? error) "Should throw error for bad URL")
                            (done))))))))
+
+(deftest load-zip-download-progress-test
+  (testing "on-download-progress fires during download and at completion"
+    (async done
+           (let [db    (atom {})
+                 calls (atom [])
+                 on-dl (fn [loaded total] (swap! calls conj [loaded total]))]
+             (-> (sut/load-zip! db "/base/test-assets.zip" zip-asset-tree
+                                {:on-download-progress on-dl})
+                 (.then (fn []
+                          (let [cs    @calls
+                                [final-loaded final-total] (last cs)]
+                            (is (seq cs) "on-download-progress should be called at least once")
+                            (is (pos? final-loaded) "final bytes-loaded should be positive")
+                            (is (= final-loaded final-total)
+                                "final call must have bytes-loaded == bytes-total (guaranteed 100%)")
+                            (is (every? (fn [[l _]] (not (neg? l))) cs)
+                                "bytes-loaded is non-negative in every call")
+                            (is (apply <= (map first cs))
+                                "bytes-loaded is monotonically non-decreasing"))
+                          (done)))
+                 (.catch (fn [err]
+                           (js/console.error "download-progress-test failed:" err)
+                           (is (nil? err))
+                           (done))))))))

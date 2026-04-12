@@ -35,12 +35,12 @@ This library supports loading assets by fetching from URLs or reading from a zip
 
 The asset tree is processed by a multimethod `visit` that distinguishes:
 - **Branch nodes**: directories with optional config (`:loader`, `:middleware`)
-- **Leaf nodes**: actual assets identified by `[path key config]` where `key` is a keyword
+- **Leaf nodes**: actual assets identified by `[path key config]` where `key` is a keyword. The `config` map may also carry `:middleware` to scope middleware to a single asset.
 
 The loader:
 1. Validates for duplicate keys and circular references
 2. Resolves asset references (created via `assets/ref`) before loading dependent assets
-3. Applies middleware chain (depth-first from outer to inner scopes)
+3. Applies middleware chain inner-to-outer: leaf middleware first, then branch middleware from the innermost branch outward
 4. Stores results in the provided atom keyed by the asset keyword
 
 ### Loaders (`src/threeagent/assets/impl/loader/`)
